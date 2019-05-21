@@ -15,10 +15,6 @@ const timeout = async (milliseconds) => {
   })
 }
 
-const getPathInATempFolder = (filename) => {
-  return path.join(app.getPath('temp'), filename)
-}
-
 describe('contentTracing', () => {
   beforeEach(function () {
     // FIXME: The tests are skipped on arm/arm64.
@@ -38,7 +34,7 @@ describe('contentTracing', () => {
     return resultFilePath
   }
 
-  const outputFilePath = getPathInATempFolder('trace.json')
+  const outputFilePath = path.join(app.getPath('temp'), 'trace.json')
   beforeEach(() => {
     if (fs.existsSync(outputFilePath)) {
       fs.unlinkSync(outputFilePath)
@@ -114,6 +110,20 @@ describe('contentTracing', () => {
 
   describe('stopRecording', function () {
     this.timeout(5e3)
+
+    it('does not crash on empty string', (done) => {
+      const options = {
+        categoryFilter: '*',
+        traceOptions: 'record-until-full,enable-sampling'
+      }
+
+      contentTracing.startRecording(options).then(() => {
+        contentTracing.stopRecording('').then(path => {
+          expect(path).to.be.a('string').that.is.not.empty()
+          done()
+        })
+      })
+    })
 
     it('calls its callback with a result file path', async () => {
       const resultFilePath = await record(/* options */ {}, outputFilePath)
