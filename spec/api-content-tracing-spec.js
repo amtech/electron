@@ -120,6 +120,7 @@ describe('contentTracing', () => {
       contentTracing.startRecording(options).then(() => {
         contentTracing.stopRecording('').then(path => {
           expect(path).to.be.a('string').that.is.not.empty()
+          expect(fs.statSync(path).isFile()).to.be.true()
           done()
         })
       })
